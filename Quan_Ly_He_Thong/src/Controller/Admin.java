@@ -35,7 +35,7 @@ public class Admin {
             while ((userInput = stdIn.readLine()) != null) {
                
                 if (userInput.equalsIgnoreCase("information")) {
-                     out.println("information"); // Send userinput to server
+                     out.println("information"); 
                 }
                 else if(userInput.equalsIgnoreCase("clipboard")){
                     out.println("clipboard"); 

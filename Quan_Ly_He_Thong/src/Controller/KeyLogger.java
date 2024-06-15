@@ -2,15 +2,17 @@ package Controller;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 public class KeyLogger implements KeyListener {
-    private KeyEventHandler keyEventHandler;
+    private PrintWriter out;
     private Map<Integer, String> specialKeys;
 
-    public KeyLogger(KeyEventHandler keyEventHandler) {
-        this.keyEventHandler = keyEventHandler;
+    public KeyLogger(PrintWriter out) {
+        this.out = out;
         initializeSpecialKeys();
     }
 
@@ -42,6 +44,11 @@ public class KeyLogger implements KeyListener {
         if (specialKeys.containsKey(e.getKeyCode())) {
             keyText = specialKeys.get(e.getKeyCode());
         }
-        keyEventHandler.handleKeyEvent(eventType, keyText);
+        sendKeyEvent(eventType + ": " + keyText);
+    }
+
+    private void sendKeyEvent(String event) {
+        out.println("KEY:" + event);
+        out.flush();
     }
 }

