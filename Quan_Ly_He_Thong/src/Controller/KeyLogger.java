@@ -2,7 +2,6 @@ package Controller;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,10 +9,12 @@ import java.util.Map;
 public class KeyLogger implements KeyListener {
     private PrintWriter out;
     private Map<Integer, String> specialKeys;
+    private boolean isRunning;
 
     public KeyLogger(PrintWriter out) {
         this.out = out;
         initializeSpecialKeys();
+        isRunning = false;
     }
 
     private void initializeSpecialKeys() {
@@ -50,5 +51,23 @@ public class KeyLogger implements KeyListener {
     private void sendKeyEvent(String event) {
         out.println("KEY:" + event);
         out.flush();
+    }
+
+    public void startKeylogger() {
+        if (!isRunning) {
+            isRunning = true;
+            // Bắt đầu lắng nghe sự kiện từ bàn phím
+            System.out.println("Keylogger started...");
+        }
+    }
+
+    public void stopKeylogger() {
+        isRunning = false;
+        // Dừng lắng nghe sự kiện từ bàn phím
+        System.out.println("Keylogger stopped.");
+    }
+
+    public boolean isRunning() {
+        return isRunning;
     }
 }

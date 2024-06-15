@@ -196,6 +196,10 @@ public class Server {
                             e.printStackTrace();
                         }
                         sendSystemInfoToAdmin();
+                    } else if ("exit".equalsIgnoreCase(inputLine)) {
+                                     for (ClientHandler user : userClients) {
+                                            user.sendCommand("exit");
+                                        }
                     }
                 }
             } catch (IOException e) {

