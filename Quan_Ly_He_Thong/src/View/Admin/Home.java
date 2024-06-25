@@ -150,12 +150,13 @@ public class Home extends JFrame {
                     }
                 } else {
                     errorLabel.setText("Kết nối thất bại.");
+                    errorLabel.setForeground(Color.RED);
                 }
             }
         });
 
          
-        getInfoButton.addActionListener(new ActionListener() {
+      getInfoButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (out != null) {
@@ -165,7 +166,7 @@ public class Home extends JFrame {
                             StringBuilder info = new StringBuilder();
                             String line;
                             while ((line = in.readLine()) != null) {
-                                if (line.startsWith("INFO:")) {
+                                if (line.startsWith("INFORMATION:")) {
                                     info.append(line.substring(5)).append("\n");
                                 } else if (line.equals("END_INFO")) {
                                     break;
@@ -184,6 +185,7 @@ public class Home extends JFrame {
                 }
             }
         });
+
         runningProcessesButton.addActionListener(e -> sendCommand("runningProcesses"));
         
         runningApplicationsButton.addActionListener(e -> sendCommand("runningApplications"));

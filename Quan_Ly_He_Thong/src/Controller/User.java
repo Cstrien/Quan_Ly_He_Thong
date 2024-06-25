@@ -36,10 +36,9 @@ public class User {
                 System.out.println("Command from server: " + serverCommand);
                 if ("information".equals(serverCommand)) {
                     StringBuilder info = new StringBuilder();
-                    info.append("CPU Info: ").append(systemInfo.getCpuInfo()).append("\n");
+                   
                     info.append("Memory Info: ").append(systemInfo.getMemoryInfo()).append("\n");
-                    info.append("Disk Info: ").append(systemInfo.getDiskInfo()).append("\n");
-                    info.append("Network Info: ").append(systemInfo.getNetworkInfo()).append("\n");
+                   
 
                     String[] infoLines = info.toString().split("\n");
                     for (String line : infoLines) {

