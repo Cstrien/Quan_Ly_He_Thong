@@ -185,6 +185,11 @@ public class Home extends JFrame {
                 }
             }
         });
+      runningProcessesButton.addActionListener(e -> {
+            SwingUtilities.invokeLater(() -> {
+                new Processes().setVisible(true);
+            });
+        });
 
         runningProcessesButton.addActionListener(e -> sendCommand("runningProcesses"));
         

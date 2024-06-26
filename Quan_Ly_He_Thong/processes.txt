@@ -1,0 +1,107 @@
+C:\Windows\System32\DriverStore\FileRepository\ipf_cpu.inf_amd64_07e81e065fff923d\ipf_helper.exe, 15916, DELL\HONG AN
+C:\Program Files\McAfee\WebAdvisor\uihost.exe, 8124, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 22168, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 28212, DELL\HONG AN
+C:\Windows\System32\sihost.exe, 19600, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 2920, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 27840, DELL\HONG AN
+C:\Windows\System32\taskhostw.exe, 23900, DELL\HONG AN
+C:\Windows\explorer.exe, 9536, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 27752, DELL\HONG AN
+C:\Windows\SystemApps\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\SearchHost.exe, 23712, DELL\HONG AN
+C:\Windows\SystemApps\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\StartMenuExperienceHost.exe, 6264, DELL\HONG AN
+C:\Program Files\WindowsApps\MicrosoftWindows.Client.WebExperience_524.13200.20.0_x64__cw5n1h2txyewy\Dashboard\Widgets.exe, 25444, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 13744, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 17616, DELL\HONG AN
+C:\Program Files\WindowsApps\MicrosoftWindows.Client.WebExperience_524.13200.20.0_x64__cw5n1h2txyewy\Dashboard\WidgetService.exe, 13940, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 25368, DELL\HONG AN
+C:\Windows\System32\dllhost.exe, 26884, DELL\HONG AN
+C:\Program Files\WindowsApps\Microsoft.YourPhone_1.24052.124.0_x64__8wekyb3d8bbwe\PhoneExperienceHost.exe, 22448, DELL\HONG AN
+C:\Windows\System32\LocationNotificationWindows.exe, 31320, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 21700, DELL\HONG AN
+C:\Windows\System32\smartscreen.exe, 18992, DELL\HONG AN
+C:\Windows\System32\SecurityHealthSystray.exe, 15624, DELL\HONG AN
+C:\Windows\System32\DriverStore\FileRepository\wavesapo12de.inf_amd64_2b6b161b8117f5ab\WavesSvc64.exe, 22260, DELL\HONG AN
+C:\Windows\System32\wbem\unsecapp.exe, 28588, DELL\HONG AN
+C:\Windows\System32\DriverStore\FileRepository\realtekservice.inf_amd64_807802da47ae00a3\RtkAudUService64.exe, 19464, DELL\HONG AN
+C:\Program Files\Riot Vanguard\vgtray.exe, 9700, DELL\HONG AN
+C:\Program Files\Microsoft OneDrive\OneDrive.exe, 19696, DELL\HONG AN
+C:\Riot Games\Riot Client\RiotClientServices.exe, 25188, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 25004, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 16376, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 20576, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 14964, DELL\HONG AN
+C:\Riot Games\Riot Client\RiotClientCrashHandler.exe, 15316, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 23172, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 30956, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\plugins\capture\ZaloCap.exe, 9384, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 7936, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 9108, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 5944, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\Zalo.exe, 11968, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 7424, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 20468, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 32592, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 1148, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 25816, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\plugins\capture\ZaviMeet.exe, 32588, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Programs\Zalo\Zalo-24.6.3\plugins\capture\ZaloCall.exe, 2768, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 11296, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 21408, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 32180, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 14104, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 31956, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 1588, DELL\HONG AN
+C:\Users\HONG AN\AppData\Local\Discord\app-1.0.9152\Discord.exe, 9600, DELL\HONG AN
+C:\Program Files\WindowsApps\Microsoft.GamingApp_2406.1001.20.0_x64__8wekyb3d8bbwe\XboxPcAppFT.exe, 19580, DELL\HONG AN
+C:\Windows\System32\ApplicationFrameHost.exe, 25020, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 3376, DELL\HONG AN
+C:\Program Files\WindowsApps\MSTeams_24152.412.2958.9166_x64__8wekyb3d8bbwe\ms-teams.exe, 1660, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 4244, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 16300, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 9624, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 3340, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 11140, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 20984, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 24924, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 30028, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 14728, DELL\HONG AN
+C:\Program Files\WindowsApps\MicrosoftTeams_24151.2105.2943.2101_x64__8wekyb3d8bbwe\msteams.exe, 4536, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 29224, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 27604, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 636, DELL\HONG AN
+C:\Program Files (x86)\VMware\VMware Workstation\vmware-tray.exe, 3320, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 20444, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 11256, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 24732, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 28428, DELL\HONG AN
+C:\Program Files\NetBeans-21\netbeans\bin\netbeans64.exe, 26860, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 10152, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 2696, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 772, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 25548, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 20564, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe, 17688, DELL\HONG AN
+C:\Windows\System32\RuntimeBroker.exe, 29556, DELL\HONG AN
+C:\Program Files\Dell\MyDell\Console\Dell.UCA.Systray.exe, 16648, DELL\HONG AN
+C:\Windows\System32\svchost.exe, 2924, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 22120, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 5076, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 20012, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 30352, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 21200, DELL\HONG AN
+C:\Program Files (x86)\Microsoft\EdgeWebView\Application\126.0.2592.68\msedgewebview2.exe, 23356, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 21464, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 4296, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 15236, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 26036, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 17456, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 32156, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 28692, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 18080, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 19344, DELL\HONG AN
+C:\Program Files\Google\Chrome\Application\chrome.exe, 18592, DELL\HONG AN
+C:\Program Files\Java\jdk-17\bin\java.exe, 5904, DELL\HONG AN
+C:\Windows\System32\conhost.exe, 18428, DELL\HONG AN
+C:\Program Files\DeskIn\DeskIn.exe, 22196, DELL\HONG AN
+C:\Program Files\WindowsApps\Microsoft.WindowsNotepad_11.2405.13.0_x64__8wekyb3d8bbwe\Notepad\Notepad.exe, 30560, DELL\HONG AN

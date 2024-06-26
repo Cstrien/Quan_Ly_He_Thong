@@ -9,7 +9,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 public class Info extends JFrame {
     private JTable osTable;
     private JTable fsRootTable;
@@ -100,6 +99,10 @@ public class Info extends JFrame {
                 clearInfo();
             }
         });
+        // Fetch initial info if available
+        if (serverInfo != null && !serverInfo.isEmpty()) {
+            fetchInfoFromServer(serverInfo);
+        }   
     }
 
     private void fetchInfoFromServer(String info) {
