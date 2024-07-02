@@ -5,15 +5,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
-import javax.imageio.ImageIO;
 import java.util.Base64;
-
 
 public class Home extends JFrame {
     private JTextField ipTextField;
@@ -32,6 +30,7 @@ public class Home extends JFrame {
     private PrintWriter out;
     private BufferedReader in;
     private Thread responseReaderThread;
+    private DisplayInfo displayInfo;
 
     public Home() {
         setTitle("Client");
@@ -120,141 +119,116 @@ public class Home extends JFrame {
         gbc.gridwidth = 3;
         add(errorLabel, gbc);
 
-         connectButton.addActionListener(new ActionListener() {
+        connectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String ip = ipTextField.getText();
-                if (isValidIPv4(ip)) {
-                    errorLabel.setText("Đã kết nối");
-                    errorLabel.setForeground(Color.GREEN);
-                    try {
-                        socket = new Socket(ip, 5254);
-                        out = new PrintWriter(socket.getOutputStream(), true);
-                        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                        out.println("ADMIN");
+                ensureConnected();
+            }
+        });
 
-                        responseReaderThread = new Thread(() -> {
-                            try {
-                                String serverResponse;
-                                while ((serverResponse = in.readLine()) != null) {
-                                    System.out.println("Server: " + serverResponse);
-                                }
-                            } catch (IOException ex) {
-                                System.err.println("Error reading from server: " + ex.getMessage());
-                            }
+        getInfoButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("GET_OS_INFO");
+            }
+        });
+
+        runningProcessesButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("runningProcesses");
+            }
+        });
+
+        runningApplicationsButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("runningApplications");
+            }
+        });
+
+        keyStrokeButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("keyStroke");
+            }
+        });
+
+        shutDownButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("shutDown");
+            }
+        });
+
+        displayButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("display");
+            }
+        });
+
+       printScreenshotButton.addActionListener(e -> {
+    if (ensureConnected()) {
+        sendCommand("SCREENSHOT");
+        new Thread(() -> {
+            try {
+                String imageData = in.readLine();
+                if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
+                    String base64Image = imageData.substring("SCREENSHOT:".length());
+                    BufferedImage image = decodeFromBase64(base64Image);
+                    if (image != null) {
+                        SwingUtilities.invokeLater(() -> {
+                            ScreenshotForm screenshotForm = new ScreenshotForm(out, in);
+                            screenshotForm.setImage(image);
+                            screenshotForm.setVisible(true);
                         });
-                        responseReaderThread.start();
-
-                        JOptionPane.showMessageDialog(Home.this, "Kết nối thành công!", "Message", JOptionPane.INFORMATION_MESSAGE);
-                    } catch (IOException ex) {
-                        errorLabel.setText("Kết nối thất bại.");
+                    } else {
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(Home.this, "Failed to decode image.", "Error", JOptionPane.ERROR_MESSAGE);
+                        });
                     }
                 } else {
-                    errorLabel.setText("Kết nối thất bại.");
-                    errorLabel.setForeground(Color.RED);
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(Home.this, "No valid image data received.", "Error", JOptionPane.ERROR_MESSAGE);
+                    });
                 }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        });
+        }).start();
+    }
+});
 
-         
-      getInfoButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (out != null) {
-                    out.println("information");
-                    new Thread(() -> {
-                        try {
-                            StringBuilder info = new StringBuilder();
-                            String line;
-                            while ((line = in.readLine()) != null) {
-                                if (line.startsWith("INFORMATION:")) {
-                                    info.append(line.substring(5)).append("\n");
-                                } else if (line.equals("END_INFO")) {
-                                    break;
-                                }
-                            }
-                            SwingUtilities.invokeLater(() -> {
-                                Info infoFrame = new Info(info.toString());
-                                infoFrame.setVisible(true);
-                            });
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }).start();
-                } else {
-                    errorLabel.setText("Not connected to server.");
-                }
-            }
-        });
-      runningProcessesButton.addActionListener(e -> {
-            SwingUtilities.invokeLater(() -> {
-                new Processes().setVisible(true);
-            });
-        });
 
-        runningProcessesButton.addActionListener(e -> sendCommand("runningProcesses"));
-        
-        runningApplicationsButton.addActionListener(e -> sendCommand("runningApplications"));
-        keyStrokeButton.addActionListener(e -> sendCommand("keyStroke"));
-        shutDownButton.addActionListener(e -> sendCommand("shutDown"));
-        displayButton.addActionListener(e -> sendCommand("display"));
-        
-        
-       printScreenshotButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (out != null) {
-                    out.println("SCREENSHOT");
-                    new Thread(() -> {
-                        try {
-                            // Chờ nhận dữ liệu hình ảnh từ server
-                            String imageData = in.readLine();
-                            if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
-                                String base64Image = imageData.substring("SCREENSHOT:".length());
-                                BufferedImage image = decodeFromBase64(base64Image);
-                                if (image != null) {
-                                    SwingUtilities.invokeLater(() -> {
-                                        ImageIcon icon = new ImageIcon(image);
-                                        JLabel label = new JLabel(icon);
-                                        JOptionPane.showMessageDialog(Home.this, label, "Screenshot", JOptionPane.PLAIN_MESSAGE);
-                                    });
-                                } else {
-                                    SwingUtilities.invokeLater(() -> {
-                                        JOptionPane.showMessageDialog(Home.this, "Failed to decode image.", "Error", JOptionPane.ERROR_MESSAGE);
-                                    });
-                                }
-                            } else {
-                                SwingUtilities.invokeLater(() -> {
-                                    JOptionPane.showMessageDialog(Home.this, "No valid image data received.", "Error", JOptionPane.ERROR_MESSAGE);
-                                });
-                            }
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }).start();
-                } else {
-                    errorLabel.setText("Not connected to server.");
-                }
-            }
-        });
- 
-
-        
         exitButton.addActionListener(e -> {
             sendCommand("exit");
-            if (responseReaderThread != null && responseReaderThread.isAlive()) {
-                responseReaderThread.interrupt();
-            }
-            if (socket != null && !socket.isClosed()) {
-                try {
-                    socket.close();
-                } catch (IOException ex) {
-                    System.err.println("Error closing socket: " + ex.getMessage());
-                }
-            }
+            closeConnections();
             System.exit(0);
         });
 
         setVisible(true);
+    }
+
+    private boolean ensureConnected() {
+        if (socket != null && socket.isConnected() && !socket.isClosed()) {
+            return true;
+        }
+        String ip = ipTextField.getText();
+        if (isValidIPv4(ip)) {
+            errorLabel.setText("Đã kết nối");
+            errorLabel.setForeground(Color.GREEN);
+            try {
+                socket = new Socket(ip, 5254);
+                out = new PrintWriter(socket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                out.println("ADMIN");
+
+
+                JOptionPane.showMessageDialog(Home.this, "Kết nối thành công!", "Message", JOptionPane.INFORMATION_MESSAGE);
+                return true;
+            } catch (IOException ex) {
+                errorLabel.setText("Kết nối thất bại.");
+                errorLabel.setForeground(Color.RED);
+            }
+        } else {
+            errorLabel.setText("Kết nối thất bại.");
+            errorLabel.setForeground(Color.RED);
+        }
+        return false;
     }
 
     private void sendCommand(String command) {
@@ -262,6 +236,26 @@ public class Home extends JFrame {
             out.println(command);
         } else {
             errorLabel.setText("Not connected to server.");
+        }
+    }
+
+    private void closeConnections() {
+        try {
+            if (responseReaderThread != null && responseReaderThread.isAlive()) {
+                responseReaderThread.interrupt();
+                responseReaderThread.join(); // Đợi cho luồng kết thúc
+            }
+            if (in != null) {
+                in.close();
+            }
+            if (out != null) {
+                out.close();
+            }
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+        } catch (IOException | InterruptedException ex) {
+            ex.printStackTrace();
         }
     }
 
@@ -279,23 +273,29 @@ public class Home extends JFrame {
         }
         return false;
     }
-    
-   private BufferedImage decodeFromBase64(String base64Image) {
-    BufferedImage image = null;
-    try {
-        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-        image = ImageIO.read(bis);
-        bis.close();
-    } catch (IOException e) {
-        e.printStackTrace();
+
+    private BufferedImage decodeFromBase64(String base64Image) {
+        BufferedImage image = null;
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
+            image = javax.imageio.ImageIO.read(bis);
+            bis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return image;
     }
-    return image;
-}
 
-
+    public void setDisplayInfo(DisplayInfo displayInfo) {
+        this.displayInfo = displayInfo;
+    }
 
     public static void main(String[] args) {
-        new Home();
+        SwingUtilities.invokeLater(() -> {
+            Home home = new Home();
+            DisplayInfo displayInfo = new DisplayInfo();
+            home.setDisplayInfo(displayInfo);
+        });
     }
 }

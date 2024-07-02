@@ -16,7 +16,7 @@ public class ScreenshotForm extends JFrame {
     private JLabel imageLabel;
     private JButton saveButton;
     private JButton captureButton;
-    private BufferedImage currentImage; 
+    private BufferedImage currentImage;
 
     public ScreenshotForm(PrintWriter out, BufferedReader in) {
         this.out = out;
@@ -27,7 +27,7 @@ public class ScreenshotForm extends JFrame {
     private void initComponents() {
         setTitle("Screenshot Viewer");
         setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Use DISPOSE_ON_CLOSE to close only this window
         setLayout(new BorderLayout());
 
         imageLabel = new JLabel();
@@ -56,7 +56,8 @@ public class ScreenshotForm extends JFrame {
             }
         });
 
-        captureScreenshot();
+        // Comment out this line to avoid automatic capture on form initialization
+        // captureScreenshot(); 
     }
 
     public void setImage(BufferedImage image) {
@@ -66,7 +67,7 @@ public class ScreenshotForm extends JFrame {
 
     private void captureScreenshot() {
         if (out != null) {
-            out.println("screenshot");
+            out.println("SCREENSHOT"); // Gửi lệnh chụp màn hình tới server
             new Thread(() -> {
                 try {
                     String imageData = in.readLine();
@@ -74,25 +75,19 @@ public class ScreenshotForm extends JFrame {
                         String base64Image = imageData.substring("SCREENSHOT:".length());
                         BufferedImage image = decodeFromBase64(base64Image);
                         if (image != null) {
-                            SwingUtilities.invokeLater(() -> {
-                                setImage(image); // Update image in the form
-                            });
+                            SwingUtilities.invokeLater(() -> setImage(image)); // Update image in the form
                         } else {
-                            SwingUtilities.invokeLater(() -> {
-                                JOptionPane.showMessageDialog(ScreenshotForm.this, "Failed to decode image.", "Error", JOptionPane.ERROR_MESSAGE);
-                            });
+                            SwingUtilities.invokeLater(() -> showErrorMessage("Failed to decode image."));
                         }
                     } else {
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(ScreenshotForm.this, "No valid image data received.", "Error", JOptionPane.ERROR_MESSAGE);
-                        });
+                        SwingUtilities.invokeLater(() -> showErrorMessage("No valid image data received."));
                     }
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }).start();
         } else {
-            JOptionPane.showMessageDialog(this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Not connected to server.");
         }
     }
 
@@ -121,7 +116,7 @@ public class ScreenshotForm extends JFrame {
         }
     }
 
-    private BufferedImage decodeFromBase64(String base64Image) {
+    public BufferedImage decodeFromBase64(String base64Image) {
         try {
             byte[] imageBytes = Base64.getDecoder().decode(base64Image);
             ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
@@ -130,6 +125,10 @@ public class ScreenshotForm extends JFrame {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static void main(String[] args) {

