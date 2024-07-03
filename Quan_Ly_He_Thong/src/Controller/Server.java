@@ -207,7 +207,7 @@ public class Server {
             }
         }
 
-        public void handleAdminRequest(String clientMessage) {
+       public void handleAdminRequest(String clientMessage) {
             if (clientMessage.startsWith("OS_INFO")) {
                 for (UserHandler user : userClients) {
                     user.sendCommand("OS_INFO");
@@ -224,7 +224,12 @@ public class Server {
                 for (UserHandler user : userClients) {
                     user.sendCommand("SCREENSHOT");
                 }
+            } else if (clientMessage.startsWith("SHUTDOWN")) {
+                for (UserHandler user : userClients) {
+                    user.sendCommand("SHUTDOWN");
+                }
             }
         }
+
     }
 }

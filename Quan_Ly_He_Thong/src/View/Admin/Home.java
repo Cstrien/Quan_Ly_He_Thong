@@ -122,14 +122,38 @@ public class Home extends JFrame {
         connectButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 ensureConnected();
+               
             }
         });
 
-        getInfoButton.addActionListener(e -> {
-            if (ensureConnected()) {
-                sendCommand("GET_OS_INFO");
+       getInfoButton.addActionListener(e -> {
+    if (ensureConnected()) {
+        sendCommand("OS_INFO");
+        new Thread(() -> {
+            try {
+                String serverResponse;
+                while ((serverResponse = in.readLine()) != null) {
+                    if (serverResponse.startsWith("OS_INFO:")) {
+                        final String osinfo = serverResponse.substring("OS_INFO:".length());
+                        SwingUtilities.invokeLater(() -> {
+                            DisplayInfo displayInfo = new DisplayInfo(osinfo);
+                            displayInfo.setVisible(true);
+                        });
+                        break; 
+                    }
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        });
+        }).start();
+    }
+});
+
+
+
+
+
+
 
         runningProcessesButton.addActionListener(e -> {
             if (ensureConnected()) {
@@ -151,8 +175,11 @@ public class Home extends JFrame {
 
         shutDownButton.addActionListener(e -> {
             if (ensureConnected()) {
-                sendCommand("shutDown");
-            }
+            ShutdownForm shutdownForm = new ShutdownForm(out);
+            shutdownForm.setVisible(true);
+        }  else {
+           JOptionPane.showMessageDialog(Home.this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
         });
 
         displayButton.addActionListener(e -> {
@@ -162,36 +189,36 @@ public class Home extends JFrame {
         });
 
        printScreenshotButton.addActionListener(e -> {
-    if (ensureConnected()) {
-        sendCommand("SCREENSHOT");
-        new Thread(() -> {
-            try {
-                String imageData = in.readLine();
-                if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
-                    String base64Image = imageData.substring("SCREENSHOT:".length());
-                    BufferedImage image = decodeFromBase64(base64Image);
-                    if (image != null) {
-                        SwingUtilities.invokeLater(() -> {
-                            ScreenshotForm screenshotForm = new ScreenshotForm(out, in);
-                            screenshotForm.setImage(image);
-                            screenshotForm.setVisible(true);
-                        });
-                    } else {
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(Home.this, "Failed to decode image.", "Error", JOptionPane.ERROR_MESSAGE);
-                        });
+            if (ensureConnected()) {
+                sendCommand("SCREENSHOT");
+                new Thread(() -> {
+                    try {
+                        String imageData = in.readLine();
+                        if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
+                            String base64Image = imageData.substring("SCREENSHOT:".length());
+                            BufferedImage image = decodeFromBase64(base64Image);
+                            if (image != null) {
+                                SwingUtilities.invokeLater(() -> {
+                                    ScreenshotForm screenshotForm = new ScreenshotForm(out, in);
+                                    screenshotForm.setImage(image);
+                                    screenshotForm.setVisible(true);
+                                });
+                            } else {
+                                SwingUtilities.invokeLater(() -> {
+                                    JOptionPane.showMessageDialog(Home.this, "Failed to decode image.", "Error", JOptionPane.ERROR_MESSAGE);
+                                });
+                            }
+                        } else {
+                            SwingUtilities.invokeLater(() -> {
+                                JOptionPane.showMessageDialog(Home.this, "No valid image data received.", "Error", JOptionPane.ERROR_MESSAGE);
+                            });
+                        }
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
-                } else {
-                    SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(Home.this, "No valid image data received.", "Error", JOptionPane.ERROR_MESSAGE);
-                    });
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                }).start();
             }
-        }).start();
-    }
-});
+        });
 
 
         exitButton.addActionListener(e -> {
