@@ -11,6 +11,9 @@ import java.util.Base64;
 import javax.imageio.ImageIO;
 
 public class User {
+    private static boolean sendingScreenshots = false;
+    private static Thread screenshotThread;
+
     public static void main(String[] args) {
         String serverAddress = "localhost"; // Địa chỉ server
         int serverPort = 5254; // Cổng server
@@ -31,22 +34,18 @@ public class User {
                 System.out.println("Command from server: " + serverCommand);
 
                 switch (serverCommand) {
-                  case "OS_INFO":
-                    String osName = System.getProperty("os.name");
-                    String osVersion = System.getProperty("os.version");
-                    String osArch = System.getProperty("os.arch");
-                    long totalMemory = Runtime.getRuntime().totalMemory();
-
-                    String osInfo = String.format("OS Name: %s\nOS Version: %s\nOS Architecture: %s\nTotal Memory: %d", osName, osVersion, osArch, totalMemory);
-                    out.println("OS_INFO:" + osInfo);
-                    break;
+                    case "OS_INFO":
+                        // Lấy thông tin hệ điều hành và gửi về server
+                        String osInfo = getOSInfo();
+                        out.println("OS_INFO:" + osInfo);
+                        break;
 
                     case "SCREENSHOT":
                         // Thực hiện chụp màn hình và gửi dữ liệu ảnh dạng Base64
                         String base64Image = takeScreenshot();
                         out.println("SCREENSHOT:" + base64Image);
                         break;
-                    
+
                     case "SHUTDOWN":
                         try {
                             String os = System.getProperty("os.name").toLowerCase();
@@ -54,7 +53,7 @@ public class User {
                                 // Hiển thị thông báo trên Windows
                                 Runtime.getRuntime().exec("cmd /c msg * /TIME:5 System will shut down in 5 seconds");
                                 Thread.sleep(1000); // Đợi một chút trước khi chạy lệnh shutdown
-                                Runtime.getRuntime().exec("shutdown -s -t 5");
+                                Runtime.getRuntime().exec("shutdown -s -t 0");
                             } else if (os.contains("nix") || os.contains("nux") || os.contains("mac")) {
                                 // Hiển thị thông báo trên Linux/Unix hoặc MacOS
                                 String shutdownCommand = os.contains("mac") ? "sudo shutdown -h now" : "shutdown -h now";
@@ -78,8 +77,14 @@ public class User {
                         }
                         break;
 
+                    case "START_VIDEO":
+                        startSendingScreenshots(out);
+                        break;
 
-                    // Xử lý các lệnh khác tại đây nếu cần
+                    case "STOP_VIDEO":
+                        stopSendingScreenshots();
+                        break;
+
                     default:
                         System.out.println("Unknown command: " + serverCommand);
                         break;
@@ -102,6 +107,49 @@ public class User {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    private static String getOSInfo() {
+        try {
+            String osName = System.getProperty("os.name");
+            String osVersion = System.getProperty("os.version");
+            String osArch = System.getProperty("os.arch");
+            long totalMemory = Runtime.getRuntime().totalMemory();
+
+            return String.format("OS Name: %s\nOS Version: %s\nOS Architecture: %s\nTotal Memory: %d", osName, osVersion, osArch, totalMemory);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static void startSendingScreenshots(PrintWriter out) {
+        sendingScreenshots = true;
+        screenshotThread = new Thread(() -> {
+            while (sendingScreenshots) {
+                String base64Image = takeScreenshot();
+                if (base64Image != null) {
+                    out.println("SCREENSHOT:" + base64Image);
+                }
+                try {
+                    Thread.sleep(100); // Adjust this value as needed
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        screenshotThread.start();
+    }
+
+    private static void stopSendingScreenshots() {
+        sendingScreenshots = false;
+        if (screenshotThread != null) {
+            try {
+                screenshotThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -141,6 +141,8 @@ public class Home extends JFrame {
                         });
                         break; 
                     }
+                    else
+                       System.out.print("không nhận đucợ OS_INFO");
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -177,16 +179,38 @@ public class Home extends JFrame {
             if (ensureConnected()) {
             ShutdownForm shutdownForm = new ShutdownForm(out);
             shutdownForm.setVisible(true);
-        }  else {
-           JOptionPane.showMessageDialog(Home.this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-        });
+              }  else {
+                         JOptionPane.showMessageDialog(Home.this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
+              }
+             });
 
-        displayButton.addActionListener(e -> {
-            if (ensureConnected()) {
-                sendCommand("display");
+        // Inside the Home class
+
+displayButton.addActionListener(e -> {
+    if (ensureConnected()) {
+        VideoForm videoForm = new VideoForm();
+        videoForm.setVisible(true);
+
+        new Thread(() -> {
+            try {
+                while (videoForm.isRunning()) {
+                    sendCommand("SCREENSHOT");
+                    String imageData = in.readLine();
+                    if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
+                        String base64Image = imageData.substring("SCREENSHOT:".length());
+                        SwingUtilities.invokeLater(() -> videoForm.updateScreenshot(base64Image));
+                    }
+                    // Adjust the sleep time to control the frequency of screenshots
+                    Thread.sleep(100); // Example: 10 screenshots per second
+                }
+                sendCommand("STOP_VIDEO");
+            } catch (IOException | InterruptedException ex) {
+                ex.printStackTrace();
             }
-        });
+        }).start();
+    }
+});
+
 
        printScreenshotButton.addActionListener(e -> {
             if (ensureConnected()) {
@@ -321,8 +345,7 @@ public class Home extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             Home home = new Home();
-            DisplayInfo displayInfo = new DisplayInfo();
-            home.setDisplayInfo(displayInfo);
+            
         });
     }
 }

