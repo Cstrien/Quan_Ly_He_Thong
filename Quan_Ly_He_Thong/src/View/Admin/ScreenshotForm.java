@@ -17,6 +17,7 @@ public class ScreenshotForm extends JFrame {
     private JButton saveButton;
     private JButton captureButton;
     private BufferedImage currentImage;
+    private volatile boolean running = true;
 
     public ScreenshotForm(PrintWriter out, BufferedReader in) {
         this.out = out;
@@ -56,8 +57,21 @@ public class ScreenshotForm extends JFrame {
             }
         });
 
-        // Comment out this line to avoid automatic capture on form initialization
-        // captureScreenshot(); 
+        // Handle window close event to stop the thread
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                running = false;
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        // Uncomment this line to capture a screenshot when the form is initialized
+        // captureScreenshot();
     }
 
     public void setImage(BufferedImage image) {
@@ -70,20 +84,24 @@ public class ScreenshotForm extends JFrame {
             out.println("SCREENSHOT"); // Gửi lệnh chụp màn hình tới server
             new Thread(() -> {
                 try {
-                    String imageData = in.readLine();
-                    if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
-                        String base64Image = imageData.substring("SCREENSHOT:".length());
-                        BufferedImage image = decodeFromBase64(base64Image);
-                        if (image != null) {
-                            SwingUtilities.invokeLater(() -> setImage(image)); // Update image in the form
+                    while (running) {
+                        String imageData = in.readLine();
+                        if (imageData != null && imageData.startsWith("SCREENSHOT:")) {
+                            String base64Image = imageData.substring("SCREENSHOT:".length());
+                            BufferedImage image = decodeFromBase64(base64Image);
+                            if (image != null) {
+                                SwingUtilities.invokeLater(() -> setImage(image)); // Update image in the form
+                            } else {
+                                SwingUtilities.invokeLater(() -> showErrorMessage("Failed to decode image."));
+                            }
                         } else {
-                            SwingUtilities.invokeLater(() -> showErrorMessage("Failed to decode image."));
+                            SwingUtilities.invokeLater(() -> showErrorMessage("No valid image data received."));
                         }
-                    } else {
-                        SwingUtilities.invokeLater(() -> showErrorMessage("No valid image data received."));
                     }
                 } catch (IOException ex) {
-                    ex.printStackTrace();
+                    if (running) {
+                        ex.printStackTrace();
+                    }
                 }
             }).start();
         } else {

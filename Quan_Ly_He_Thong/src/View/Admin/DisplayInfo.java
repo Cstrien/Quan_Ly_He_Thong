@@ -5,10 +5,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 
 public class DisplayInfo extends JFrame {
     private JTable osTable;
@@ -16,14 +13,17 @@ public class DisplayInfo extends JFrame {
     private JButton getButton;
     private JButton saveButton;
     private JButton clearButton;
-    private String serverInfo;
+    private BufferedReader in;
+    private PrintWriter out;
 
-    public DisplayInfo() {
-        this("");
+    public DisplayInfo(BufferedReader in, PrintWriter out) {
+        this.in = in;
+        this.out = out;
+        initializeUI();
+        fetchInfoFromServer(); // Initial fetch of server info
     }
 
-    public DisplayInfo(String info) {
-        this.serverInfo = info;
+    private void initializeUI() {
         setTitle("Information System");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -84,12 +84,7 @@ public class DisplayInfo extends JFrame {
         getButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Get button pressed. ServerInfo: " + serverInfo);  // Debug print
-                if (serverInfo != null && !serverInfo.isEmpty()) {
-                    fetchInfoFromServer(serverInfo);
-                } else {
-                    JOptionPane.showMessageDialog(DisplayInfo.this, "No information available.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
+                fetchInfoFromServer();
             }
         });
 
@@ -106,70 +101,87 @@ public class DisplayInfo extends JFrame {
                 clearInfo();
             }
         });
-
-        System.out.println("Initial ServerInfo: " + serverInfo);  // Debug print
-        if (serverInfo != null && !serverInfo.isEmpty()) {
-            fetchInfoFromServer(serverInfo);
-        }
     }
 
-    private void fetchInfoFromServer(String info) {
-        DefaultTableModel osTableModel = (DefaultTableModel) osTable.getModel();
-        osTableModel.setRowCount(0);  // Clear the table
+   private void fetchInfoFromServer() {
+    if (out != null) {
+        out.println("OS_INFO");
 
-        String[] lines = info.split("\n");
-        for (String line : lines) {
-            if (line.startsWith("OS Name:")) {
-                osTableModel.addRow(new Object[]{"OS Name", line.substring("OS Name:".length()).trim()});
-            } else if (line.startsWith("OS Version:")) {
-                osTableModel.addRow(new Object[]{"OS Version", line.substring("OS Version:".length()).trim()});
-            } else if (line.startsWith("OS Architecture:")) {
-                osTableModel.addRow(new Object[]{"OS Architecture", line.substring("OS Architecture:".length()).trim()});
-            } else if (line.startsWith("Total Memory:")) {
-                osTableModel.addRow(new Object[]{"Total Memory", line.substring("Total Memory:".length()).trim()});
+        new Thread(() -> {
+            try {
+                String response;
+                StringBuilder dataBuilder = new StringBuilder();
+                while ((response = in.readLine()) != null) {
+                    System.out.println("Server response: " + response);
+                    if (response.startsWith("OS_INFO:")) {
+                        dataBuilder.append(response.substring("OS_INFO:".length())); // Exclude "OS_INFO:" prefix
+                        String info = dataBuilder.toString().trim();
+                        SwingUtilities.invokeLater(() -> {
+                            DefaultTableModel model = (DefaultTableModel) osTable.getModel();
+                            model.setRowCount(0); // Clear previous data
+
+                            // Split info into lines and update the table
+                            String[] lines = info.split("\n");
+                            for (String line : lines) {
+                                String[] parts = line.split(": ");
+                                if (parts.length >= 2) {
+                                    model.addRow(new Object[]{parts[0], parts[1]});
+                                }
+                            }
+                        });
+                        break;
+                    } else {
+                        dataBuilder.append(response).append("\n");
+                    }
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
-        }
+        }).start();
+    } else {
+        JOptionPane.showMessageDialog(DisplayInfo.this, "Not connected to server.", "Error", JOptionPane.ERROR_MESSAGE);
     }
+}
+
+
+
+
 
     private void saveInfo() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Specify a file to save");
+        fileChooser.setDialogTitle("Save Information");
+        int userSelection = fileChooser.showSaveDialog(DisplayInfo.this);
 
-        int userSelection = fileChooser.showSaveDialog(this);
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
-            String filePath = fileToSave.getAbsolutePath();
-            if (!filePath.endsWith(".txt")) {
-                filePath += ".txt";
-            }
-            fileToSave = new File(filePath);
-
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(fileToSave))) {
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileToSave))) {
                 DefaultTableModel osTableModel = (DefaultTableModel) osTable.getModel();
-
-                bw.write("OS Information:\n");
                 for (int i = 0; i < osTableModel.getRowCount(); i++) {
-                    bw.write(osTableModel.getValueAt(i, 0) + ": " + osTableModel.getValueAt(i, 1) + "\n");
+                    String item = osTableModel.getValueAt(i, 0).toString();
+                    String value = osTableModel.getValueAt(i, 1).toString();
+                    writer.write(item + ": " + value + "\n");
                 }
-
-                JOptionPane.showMessageDialog(this, "Info saved to " + fileToSave.getAbsolutePath(), "Save Info", JOptionPane.INFORMATION_MESSAGE);
-            } catch (IOException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error saving info", "Save Info", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(DisplayInfo.this, "Information saved successfully!", "Save Info", JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(DisplayInfo.this, "Failed to save information!", "Save Info", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
             }
         }
     }
 
     private void clearInfo() {
-        ((DefaultTableModel) osTable.getModel()).setRowCount(0);
-        ((DefaultTableModel) fsRootTable.getModel()).setRowCount(0);
+        DefaultTableModel osTableModel = (DefaultTableModel) osTable.getModel();
+        osTableModel.setRowCount(0); // Clear table rows
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            String sampleInfo = "OS Name: Windows 10\nOS Version: 10.0\nOS Architecture: amd64\nTotal Memory: 1610612736";
-            DisplayInfo infoFrame = new DisplayInfo(sampleInfo);
-            infoFrame.setVisible(true);
+            // Example connection setup
+            BufferedReader dummyIn = new BufferedReader(new InputStreamReader(System.in));
+            PrintWriter dummyOut = new PrintWriter(System.out, true);
+
+            DisplayInfo displayInfo = new DisplayInfo(dummyIn, dummyOut);
+            displayInfo.setVisible(true);
         });
     }
 }

