@@ -1,17 +1,21 @@
 # Quan_Ly_He_Thong
 
- Rule Commit
-   <type>:<description>
-   <body>
-VD feat: thêm thông báo mới
+**Mục tiêu:**  
+Xây dựng một hệ thống quản lý và giám sát các thiết bị nội bộ (máy tính, server, thiết bị IoT) thông qua mạng nội bộ (local IP). Hệ thống giúp theo dõi trạng thái, thông tin cơ bản và hỗ trợ quản trị hiệu quả.
 
-type:
-- feat: Một tính năng mới (feature)
-- fic Sứa lỗi (fix bug)
-- docs: Cập nhật tài liệu (sửa documents)
-- style: Thêm khoảng trắng, format code, thiếu dấu chấm phảy,...
-- refactor: Đổi tên hàm, tên biến dễ hiểu hơn, tách hàm con, xóa code thừa,...
-- perf: Cải tiến hiệu năng
-- test Thêm test case còn thiếu, sửa unit test, -
-- build: Những thay đổi ảnh hưởng đến quá trình build
-- ci: Thay đổi file cấu hình hoặc script Cl
+---
+
+##  Mục tiêu dự án
+- Giám sát và quản lý toàn bộ thiết bị nội bộ qua IP local.
+- Hiển thị trạng thái hoạt động, thông tin hệ thống cơ bản như hostname, IP, uptime.
+- Hỗ trợ tìm kiếm và phân loại thiết bị theo nhóm.
+- Cung cấp alert đơn giản khi thiết bị offline hoặc có vấn đề mạng.
+
+---
+
+##  Tính năng chính
+- **Asset Discovery**: Quét và phát hiện các thiết bị đang hoạt động trên mạng nội bộ.
+- **Device Inventory**: Lưu trữ thông tin như IP, hostname, OS, uptime.
+- **Dashboard Giám sát**: Giao diện tổng quan trạng thái thực tế các thiết bị.
+- **Alert Notification**: Cảnh báo khi phát hiện thiết bị offline hoặc không phản hồi.
+- **Báo cáo / Export**: Xuất báo cáo danh sách thiết bị và trạng thái hiện tại.
